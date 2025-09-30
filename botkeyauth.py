@@ -1,4 +1,3 @@
-````python
 import discord
 from discord.ext import commands
 import gspread
@@ -138,4 +137,3 @@ async def delkey(ctx, key: str):
 
 if __name__ == "__main__":
     bot.run(DISCORD_TOKEN)
-````
