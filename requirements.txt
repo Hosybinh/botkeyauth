@@ -1,6 +1,5 @@
-python-3.11.9
-discord.py==2.3.2
+nextcord==2.6.0
 gspread==6.1.2
 oauth2client==4.1.3
-python-dotenv
-flask
+python-dotenv==1.0.1
+flask==3.0.3
