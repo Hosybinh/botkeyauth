@@ -8,7 +8,6 @@ import datetime
 import os
 import json
 from dotenv import load_dotenv
-from discord.ui import View, Button
 
 # ==== LOAD CONFIG =====
 load_dotenv()  # chỉ dùng khi chạy local
@@ -63,7 +62,7 @@ async def check_permission(ctx):
     return True
 
 
-# Tạo key mới (có nút Copy)
+# Tạo key mới
 @bot.command()
 async def createkey(ctx, amount: int = 1, days: int = 30):
     """Tạo key mới: !createkey <số lượng> <số ngày>"""
@@ -80,23 +79,8 @@ async def createkey(ctx, amount: int = 1, days: int = 30):
         keys.append(key)
 
     msg = "\n".join(keys)
-
-    # Tạo button Copy
-    view = View()
-    copy_button = Button(label="📋 Copy", style=discord.ButtonStyle.primary)
-
-    async def copy_callback(interaction):
-        await interaction.response.send_message(
-            f"✅ Đây là key của bạn:\n```{msg}```\n*(Hãy copy từ code block này)*",
-            ephemeral=True  # chỉ người bấm mới thấy
-        )
-
-    copy_button.callback = copy_callback
-    view.add_item(copy_button)
-
     await ctx.send(
-        f"✅ Created {amount} keys, valid for {days} days:\n```{msg}```",
-        view=view
+        f"✅ Created {amount} keys, valid for {days} days:\n```{msg}```"
     )
 
 
@@ -131,6 +115,24 @@ async def delkey(ctx, key: str):
         if row[0] == key:
             sheet.delete_rows(i + 1)
             await ctx.send(f"🗑️ Deleted key: `{key}`")
+            return
+    await ctx.send("❌ Key not found.")
+
+
+# Sửa ngày hết hạn của key
+@bot.command()
+async def editkey(ctx, key: str, days: int):
+    """Sửa ngày hết hạn: !editkey <key> <số ngày mới>"""
+    if not await check_permission(ctx):
+        return
+
+    data = sheet.get_all_values()
+    for i, row in enumerate(data):
+        if row[0] == key:
+            new_expiry = (datetime.datetime.now() +
+                          datetime.timedelta(days=days)).strftime("%d/%m/%Y %H:%M:%S")
+            sheet.update_cell(i + 1, 2, new_expiry)  # cột 2 = EXPIRY_DATE
+            await ctx.send(f"✏️ Key `{key}` đã được cập nhật hạn dùng mới: `{new_expiry}`")
             return
     await ctx.send("❌ Key not found.")
 
